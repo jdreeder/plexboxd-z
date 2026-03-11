@@ -1,16 +1,32 @@
 {
   "manifest_version": 3,
   "name": "PlexBoxd",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Check Plex server availability for movies on Letterboxd",
   "permissions": [
     "storage",
     "activeTab",
     "scripting",
-    "tabs"
+    "tabs",
+    "identity",
+    "windows",
+    "cookies"
   ],
   "host_permissions": [
-    "https://letterboxd.com/*"
+    "https://letterboxd.com/*",
+    "https://plex.tv/*",
+    "https://app.plex.tv/*",
+    "https://*.plex.tv/*",
+    "*://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://letterboxd.com/film/*"],
+      "js": ["content-script.js"]
+    }
   ],
   "action": {
     "default_popup": "popup.html",

@@ -4,60 +4,117 @@
     <title>PlexBoxd</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Popup-specific styles */
-        body {
-            min-width: 300px;
-            padding: 16px;
-        }
-        .container {
-            padding: 0;
-        }
-        #debugInfo {
-            margin-top: 16px;
-            padding: 8px;
-            background: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 12px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-    </style>
 </head>
-<body class="popup-body">
-    <div class="header">
-        <h1 class="title">PlexBoxd</h1>
-        <label class="power-button">
-            <input type="checkbox" id="masterToggle">
-            <span class="power-icon"></span>
-        </label>
+<body class="popup">
+
+    <!-- Header -->
+    <div class="popup-header">
+        <h1 class="popup-logo">PlexBoxd</h1>
+        <div class="popup-header-actions">
+            <button id="theme-toggle" class="popup-theme-btn" title="Toggle light/dark">
+                <i class="fas fa-sun"></i>
+            </button>
+            <div id="popup-accent-dot" class="popup-accent-dot">&#9654;</div>
+        </div>
     </div>
 
-    <div class="content-wrapper initial-load">
-        <div id="movie-title"></div>
-        
-        <div id="server-availability"></div>
-        
-        <div id="no-movie-info" style="display: none;">
-            <i class="fas fa-film"></i> No movie detected
-        </div>
-        
-        <div id="no-servers" style="display: none;">
-            <i class="fas fa-server"></i> No servers configured
+    <!-- Loading -->
+    <div id="loading" style="display: none;">
+        <div class="loading-spinner"></div>
+        <span>Checking availability...</span>
+    </div>
+
+    <!-- Error / not on film page -->
+    <div id="error-message" style="display: none;"></div>
+
+    <!-- Movie content (shown once movie data is ready) -->
+    <div id="movie-content" style="display: none;">
+
+        <!-- Title -->
+        <h2 id="movie-title" class="popup-movie-title"></h2>
+
+        <!-- Grid: poster (left) + info (right) -->
+        <div class="popup-grid">
+
+            <!-- Poster column -->
+            <div class="popup-poster-col">
+                <div class="popup-poster">
+                    <img id="movie-poster-img" class="popup-poster-img" style="display:none;" alt="Movie poster">
+                    <div id="poster-placeholder" class="popup-poster-placeholder">
+                        <span class="poster-icon">&#127916;</span>
+                        <span class="poster-label">Poster</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info column -->
+            <div class="popup-info-col">
+
+                <!-- Status badge (innerHTML set by popup.js) -->
+                <div id="server-availability" style="display: none;"></div>
+
+                <!-- Letterboxd rating (stars + numeric) -->
+                <div id="popup-rating-section" style="display: none;">
+                    <span class="popup-label">Letterboxd Rating</span>
+                    <div class="popup-rating-stars-row">
+                        <div id="popup-rating-stars" class="popup-rating-stars"></div>
+                        <span id="popup-rating-value" class="popup-rating-score"></span>
+                    </div>
+                </div>
+
+                <!-- Your rating (shown only if logged into Letterboxd) -->
+                <div id="popup-user-rating" style="display: none;">
+                    <span class="popup-label">Your Rating</span>
+                    <div id="popup-stars" class="popup-stars"></div>
+                </div>
+
+                <!-- Year (+ watched badge only when confirmed) -->
+                <div class="popup-meta-grid">
+                    <div class="popup-meta-cell">
+                        <span class="popup-meta-label">YEAR</span>
+                        <span id="popup-year" class="popup-meta-value">&#8212;</span>
+                    </div>
+                    <div id="popup-watched-cell" class="popup-meta-cell" style="display: none;">
+                        <span class="popup-meta-label">STATUS</span>
+                        <span id="popup-watched" class="popup-meta-value">&#8212;</span>
+                    </div>
+                </div>
+
+                <!-- Genre tags -->
+                <div id="popup-genres" class="popup-genres"></div>
+
+            </div>
         </div>
 
-        <button id="settings-button">
+        <!-- Action buttons (full-width, below the grid) -->
+        <div id="actions" class="popup-actions" style="display: none;"></div>
+
+    </div>
+
+    <!-- Footer: settings + debug toggle -->
+    <div class="popup-footer">
+        <button id="settings-button" class="popup-settings-btn">
             <i class="fas fa-cog"></i> Settings
         </button>
-
-        <!-- Debug Info Section -->
-        <div id="debugInfo"></div>
+        <button id="debug-toggle" class="popup-debug-link">Show Debug Info</button>
     </div>
 
+    <!-- Debug panel (same IDs, kept for popup.js compatibility) -->
+    <div id="debug-info" class="popup-debug" style="display: none;">
+        <h4>Debug</h4>
+        <div id="debug-server-type">Server Type: <span>None</span></div>
+        <div id="debug-url">URL: <span>Not set</span></div>
+        <div id="debug-auth">Auth Method: <span>None</span></div>
+        <div id="debug-movie">Movie Info: <span>None</span></div>
+        <div id="debug-error">Last Error: <span>None</span></div>
+        <div id="debug-raw">Raw Response: <span>None</span></div>
+    </div>
+
+    <!-- Hidden master toggle (kept for popup.js compatibility) -->
+    <input type="checkbox" id="masterToggle" style="display: none;">
+
+    <script src="overseerr-integration.js"></script>
+    <script src="ombi-integration.js"></script>
     <script src="popup.js"></script>
 </body>
-</html> 
+</html>
