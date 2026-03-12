@@ -662,7 +662,7 @@ function displayResult(movieInfo, availability) {
                             throw new Error('Request server client not initialized');
                         }
                         
-                        const movieDetails = availability.movie;
+                        const movieDetails = availability.movie || availability.details;
                         if (!movieDetails) {
                             throw new Error('No movie details available for request');
                         }
