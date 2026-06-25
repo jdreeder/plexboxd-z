@@ -362,6 +362,30 @@ async function displayUserInfo() {
     }
 }
 
+function updateServerStatusBar(client) {
+    const bar = document.getElementById('server-status-bar');
+    const dot = document.getElementById('server-online-dot');
+    const label = document.getElementById('server-status-label');
+    const badge = document.getElementById('server-quota-badge');
+    if (!bar || !dot || !label || !badge) return;
+
+    bar.style.display = 'flex';
+    const serverType = client instanceof OverseerrIntegration ? 'Seerr' : 'Ombi';
+    label.textContent = serverType;
+    dot.className = 'server-online-dot online';
+
+    if (client instanceof OverseerrIntegration) {
+        client.getUserQuota().then(q => {
+            if (!q || !badge) return;
+            badge.style.display = 'inline-flex';
+            if (q.remaining != null && q.limit) {
+                badge.textContent = `${q.remaining}/${q.limit} requests`;
+                badge.className = 'server-quota-badge' + (q.remaining === 0 ? ' quota-empty' : '');
+            }
+        }).catch(() => {});
+    }
+}
+
 // Check movie availability in Overseerr
 async function checkMovieAvailability(movieData) {
     console.log('=== checkMovieAvailability() called in popup.js ===', movieData);
@@ -387,7 +411,8 @@ async function checkMovieAvailability(movieData) {
         console.error('Failed to initialize request server client');
         return;
     }
-    
+
+    updateServerStatusBar(requestServer);
     console.log('Checking availability for movie:', movieData);
     
     try {
@@ -444,7 +469,7 @@ function displayNotInDatabase(movieData, tmdbId) {
 
     const title = document.createElement('div');
     title.className = 'server-title';
-    title.textContent = 'Not in Overseerr Database';
+    title.textContent = 'Not in Seerr Database';
     item.appendChild(title);
 
     const action = document.createElement('button');
@@ -571,6 +596,11 @@ function displayResult(movieInfo, availability) {
                 icon         = '<i class="fas fa-ban"></i>';
                 statusText   = 'Request Denied';
                 statusSubtext = 'Request was not approved';
+            } else if (availability.quotaExhausted) {
+                circleColor  = '#f59e0b';
+                icon         = '<i class="fas fa-hourglass-half"></i>';
+                statusText   = 'No Requests Remaining';
+                statusSubtext = 'Check unlock times below';
             } else {
                 circleColor  = '#ef4444';
                 icon         = '<i class="fas fa-times"></i>';
@@ -606,6 +636,25 @@ function displayResult(movieInfo, availability) {
                 action = `<button class="action-button denied-button popup-action-btn popup-action-outline" disabled style="border-color:#6b7280;color:#6b7280">
                     <i class="fas fa-ban"></i> Request Denied
                 </button>`;
+            } else if (availability.quotaExhausted && availability.unlockTimes?.length > 0) {
+                const badge = document.getElementById('server-quota-badge');
+                if (badge) badge.style.display = 'none';
+                const byDate = {};
+                for (const d of availability.unlockTimes) {
+                    const key = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    byDate[key] = (byDate[key] || 0) + 1;
+                }
+                const lines = Object.entries(byDate)
+                    .map(([date, count]) => `<span>${date} &mdash; ${count} slot${count > 1 ? 's' : ''}</span>`)
+                    .join('');
+                const seerrUrl = window.requestServerUrl || '';
+                action = `<button class="action-button quota-button popup-action-btn" id="quota-seerr-btn">
+                    <img class="quota-seerr-logo" src="${seerrUrl}/favicon.ico" onerror="this.style.display='none'" alt="Overseerr">
+                    <div class="quota-info">
+                        <span class="quota-info-label">Slots unlock</span>
+                        ${lines}
+                    </div>
+                </button>`;
             } else {
                 action = `<button class="action-button request-button popup-action-btn popup-action-primary">
                     <i class="fas fa-plus"></i> Request
@@ -614,6 +663,7 @@ function displayResult(movieInfo, availability) {
 
             actionsElement.innerHTML = action;
             actionsElement.style.display = 'block';
+
             
             // Add event listeners for the buttons
             const watchButton = actionsElement.querySelector('.watch-button');
@@ -702,6 +752,14 @@ function displayResult(movieInfo, availability) {
                         requestButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Request Failed - Try Again';
                         showError(`Failed to request movie: ${error.message}`);
                     }
+                });
+            }
+
+            const quotaBtn = actionsElement.querySelector('#quota-seerr-btn');
+            if (quotaBtn) {
+                quotaBtn.addEventListener('click', () => {
+                    const url = window.requestServerUrl;
+                    if (url) chrome.tabs.create({ url: url + '/requests' });
                 });
             }
         }
@@ -1134,7 +1192,7 @@ async function initializeRequestServer() {
             // Initialize Overseerr client
             if (!overseerrUrl) {
                 console.error('Overseerr URL not configured');
-                showError('Please configure your Overseerr server URL in settings');
+                showError('Please configure your Seerr server URL in settings');
                 return null;
             }
             
@@ -1174,7 +1232,7 @@ async function initializeRequestServer() {
             
             // Update debug info
             updateDebugInfo({
-                serverType: 'Overseerr',
+                serverType: 'Seerr',
                 url: overseerrUrl,
                 authMethod: window.requestServerClient.getAuthMethod ? window.requestServerClient.getAuthMethod() : 'Unknown'
             });

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PlexBoxd",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Check Plex server availability for movies on Letterboxd",
   "permissions": [
     "storage",

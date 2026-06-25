@@ -2046,3 +2046,113 @@ body.popup.light .popup-debug {
 body.popup.light .popup-debug span {
     color: #475569;
 }
+
+body.popup .server-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 5px 16px;
+    background: rgba(0,0,0,0.15);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 11px;
+}
+
+body.popup .server-status-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+body.popup .server-online-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #6b7280;
+}
+
+body.popup .server-online-dot.online { background: #10b981; }
+body.popup .server-online-dot.offline { background: #ef4444; }
+
+body.popup .server-status-label {
+    color: rgba(255,255,255,0.45);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+body.popup .server-quota-badge {
+    color: rgba(255,255,255,0.55);
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+}
+
+body.popup .server-quota-badge.quota-empty {
+    color: #f87171;
+}
+
+body.popup.light .server-status-bar {
+    background: rgba(0,0,0,0.04);
+    border-bottom-color: #e2e8f0;
+}
+
+body.popup.light .server-status-label,
+body.popup.light .server-quota-badge {
+    color: #64748b;
+}
+
+body.popup .action-button.quota-button {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 2px solid rgba(245, 158, 11, 0.4);
+    cursor: pointer;
+    height: auto;
+    padding: 10px 14px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: flex-start;
+}
+
+body.popup .action-button.quota-button:hover {
+    background-color: rgba(245, 158, 11, 0.18);
+}
+
+body.popup .quota-seerr-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+body.popup .quota-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    flex: 1;
+    text-align: left;
+}
+
+body.popup .quota-info-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+}
+
+body.popup .quota-info span {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+body.popup .quota-count {
+    margin: 6px 0 0;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 0.02em;
+}

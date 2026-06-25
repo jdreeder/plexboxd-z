@@ -7,6 +7,7 @@ class OverseerrIntegration {
         this.plexUser = null;
         this.apiKey = null; // Fallback for API key auth
         this._lastSearchResults = []; // Store last search results for future availability checks
+        this.overseerrUserId = null;
         console.log('=== OVERSERR INTEGRATION READY ===');
     }
 
@@ -280,6 +281,7 @@ class OverseerrIntegration {
                     if (authData.id && authData.plexUsername) {
                         // Session-based auth - store session info instead of token
                         this.sessionData = authData;
+                        this.overseerrUserId = authData.id;
                         console.log('✅ Using session-based authentication');
 
                         // Store session data in chrome storage
@@ -394,6 +396,7 @@ class OverseerrIntegration {
             if (response.ok) {
                 const userData = await response.json();
                 console.log('✅ Session is valid, user data:', userData);
+                this.overseerrUserId = userData.id;
                 return true;
             } else {
                 console.log('❌ Session verification failed');
@@ -426,6 +429,7 @@ class OverseerrIntegration {
             if (response.ok) {
                 const userData = await response.json();
                 console.log('✅ Token is valid, user data:', userData);
+                this.overseerrUserId = userData.id;
                 return true;
             } else {
                 console.log('❌ Token verification failed');
@@ -458,6 +462,7 @@ class OverseerrIntegration {
             if (response.ok) {
                 const userData = await response.json();
                 console.log('✅ API key is valid, user data:', userData);
+                this.overseerrUserId = userData.id;
                 return true;
             } else {
                 console.log('❌ API key verification failed');
@@ -806,7 +811,45 @@ class OverseerrIntegration {
     getUserInfo() {
         return this.plexUser;
     }
-    
+
+    async getUserQuota() {
+        if (!this.overseerrUserId) {
+            try {
+                const res = await fetch(this.baseUrl + '/api/v1/auth/me',
+                    { method: 'GET', headers: this.getAuthHeaders(), mode: 'cors', credentials: 'include' });
+                if (res.ok) this.overseerrUserId = (await res.json()).id;
+            } catch {}
+        }
+        if (!this.overseerrUserId) return null;
+        try {
+            const res = await fetch(
+                `${this.baseUrl}/api/v1/user/${this.overseerrUserId}/quota`,
+                { method: 'GET', headers: this.getAuthHeaders(), mode: 'cors', credentials: 'include' }
+            );
+            if (!res.ok) return null;
+            const data = await res.json();
+            return data?.movie ?? null;
+        } catch { return null; }
+    }
+
+    async getRequestUnlockTimes() {
+        if (!this.overseerrUserId) return [];
+        try {
+            const res = await fetch(
+                `${this.baseUrl}/api/v1/request?requestedBy=${this.overseerrUserId}&take=20&sort=added`,
+                { method: 'GET', headers: this.getAuthHeaders(), mode: 'cors', credentials: 'include' }
+            );
+            if (!res.ok) return [];
+            const data = await res.json();
+            const requests = data?.results ?? [];
+            const windowStart = Date.now() - 30 * 24 * 60 * 60 * 1000;
+            return requests
+                .filter(r => r.mediaType === 'movie' && new Date(r.createdAt).getTime() > windowStart)
+                .map(r => new Date(new Date(r.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000))
+                .sort((a, b) => a - b);
+        } catch { return []; }
+    }
+
     getAuthMethod() {
         return this.token ? 'token' : this.apiKey ? 'apiKey' : 'none';
     }
@@ -921,7 +964,18 @@ class OverseerrIntegration {
                         plexUrl: movie.plexUrl,
                         movie: movie
                     };
-                    
+
+                    if (!result.available && !result.requested) {
+                        const quota = await this.getUserQuota();
+                        if (quota) {
+                            result.quota = { remaining: quota.remaining, limit: quota.limit };
+                            if (quota.remaining === 0) {
+                                result.quotaExhausted = true;
+                                result.unlockTimes = await this.getRequestUnlockTimes();
+                            }
+                        }
+                    }
+
                     console.log('✅ Availability check complete (TMDB ID):', result);
                     return result;
                 }
@@ -969,7 +1023,18 @@ class OverseerrIntegration {
                 plexUrl: availability.plexUrl,
                 movie: bestMatch
             };
-            
+
+            if (!result.available && !result.requested) {
+                const quota = await this.getUserQuota();
+                if (quota) {
+                    result.quota = { remaining: quota.remaining, limit: quota.limit };
+                    if (quota.remaining === 0) {
+                        result.quotaExhausted = true;
+                        result.unlockTimes = await this.getRequestUnlockTimes();
+                    }
+                }
+            }
+
             console.log('✅ Availability check complete:', result);
             return result;
         } catch (error) {

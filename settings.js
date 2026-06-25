@@ -143,12 +143,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             overseerrConnectionStatus.textContent = 'Connected';
             overseerrConnectionStatus.className = 'connection-status success';
-            showToast('Successfully connected to Overseerr');
+            showToast('Successfully connected to Seerr');
         } catch (error) {
             console.error('Overseerr connection error:', error);
             overseerrConnectionStatus.textContent = 'Connection failed';
             overseerrConnectionStatus.className = 'connection-status error';
-            showToast('Failed to connect to Overseerr', 'error');
+            showToast('Failed to connect to Seerr', 'error');
         }
     }
 
@@ -159,9 +159,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const overseerrApiKey = document.getElementById('overseerrApiKey').value.trim();
             
             if (!overseerrUrl) {
-                overseerrConnectionStatus.textContent = 'Please enter an Overseerr URL';
+                overseerrConnectionStatus.textContent = 'Please enter a Seerr URL';
                 overseerrConnectionStatus.className = 'connection-status error';
-                showToast('Please enter an Overseerr URL', 'error');
+                showToast('Please enter a Seerr URL', 'error');
                 return;
             }
             
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (isValid) {
                 overseerrConnectionStatus.textContent = 'Connected successfully';
                 overseerrConnectionStatus.className = 'connection-status success';
-                showToast('Successfully connected to Overseerr using API key');
+                showToast('Successfully connected to Seerr using API key');
                 
                 // Save the settings if successful
                 await chrome.storage.local.set({ 
@@ -197,13 +197,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 overseerrConnectionStatus.textContent = 'Connection failed - Invalid API key or URL';
                 overseerrConnectionStatus.className = 'connection-status error';
-                showToast('Failed to connect to Overseerr using API key', 'error');
+                showToast('Failed to connect to Seerr using API key', 'error');
             }
         } catch (error) {
             console.error('API key test error:', error);
             overseerrConnectionStatus.textContent = 'Connection failed: ' + (error.message || 'Unknown error');
             overseerrConnectionStatus.className = 'connection-status error';
-            showToast(`Failed to connect to Overseerr: ${error.message}`, 'error');
+            showToast(`Failed to connect to Seerr: ${error.message}`, 'error');
         }
     }
     
@@ -612,9 +612,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             const overseerrUrl = overseerrUrlInput.value.trim();
             if (!overseerrUrl) {
-                overseerrConnectionStatus.textContent = 'Please enter an Overseerr URL';
+                overseerrConnectionStatus.textContent = 'Please enter a Seerr URL';
                 overseerrConnectionStatus.className = 'connection-status error';
-                showToast('Please enter an Overseerr URL', 'error');
+                showToast('Please enter a Seerr URL', 'error');
                 return;
             }
             overseerrConnectionStatus.textContent = 'Testing connection...';
@@ -635,7 +635,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 overseerrConnectionStatus.textContent = 'Connected as Plex user';
                 overseerrConnectionStatus.className = 'connection-status success';
-                showToast('Successfully connected to Overseerr as Plex user');
+                showToast('Successfully connected to Seerr as Plex user');
                 // Show user info
                 const user = testClient.plexUser;
                 if (user) {
@@ -653,14 +653,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 overseerrConnectionStatus.textContent = 'Connection failed (Plex user)';
                 overseerrConnectionStatus.className = 'connection-status error';
                 overseerrPlexUserInfo.style.display = 'none';
-                showToast('Failed to connect to Overseerr as Plex user', 'error');
+                showToast('Failed to connect to Seerr as Plex user', 'error');
             }
         } catch (error) {
             console.error('Overseerr Plex user connection error:', error);
             overseerrConnectionStatus.textContent = 'Connection failed (Plex user)';
             overseerrConnectionStatus.className = 'connection-status error';
             overseerrPlexUserInfo.style.display = 'none';
-            showToast('Failed to connect to Overseerr as Plex user', 'error');
+            showToast('Failed to connect to Seerr as Plex user', 'error');
         }
     }
     // Attach event listener
